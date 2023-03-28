@@ -1,8 +1,6 @@
-function preload(){
-	// inconsolata = loadFont('assets/inconsolata.otf');
-}
+let blurShader;
 
-let nSlimes = 1;
+let nSlimes = 0;
 
 let slimes = [];
 let background_gray = 0;
@@ -14,40 +12,42 @@ var canvas;// = document.getElementById("canvas");
 var ctx;//    = canvas.getContext("2d");
 // const image  = document.getElementById("source");
 
-// ghost change delete later
+
+
+function preload(){
+	// load the shader
+	blurShader = loadShader('blur.vert','blur.frag');
+}
 
 function setup() {
 	createCanvas( windowWidth, windowHeight, WEBGL);
-	// createCanvas(windowWidth, windowHeight);
 	ctx = canvas.getContext('webgl');
 
-	// canvas = document.getElementById("defaultCanvas0");
-	// console.log(canvas);
-	
 	console.log(ctx);
 	
-
-	translate(width/2, height/2);
 	background(background_gray);
 	
 	for(let i = 0; i<nSlimes; i++){
-		slimes[i] = new Slime(width, height);
+		slimes[i] = new Slime(width, heght);
 	}
 
-	// console.log(width/2, height/2);
+	rectMode(CENTER);
+	noStroke();
+	fill(255);
+	rect(0,0,100,100);
+
 }
 
 function draw() {
-	background(background_gray, background_alpha);
-	translate(width/2, height/2);
-
-	// ctx.filter = 'blur(15px)';
+	// Set the shader and pass the blur amount
+	shader(blurShader);
+	blurShader.setUniform('blurAmount', 100);
 
 	for( let i=0; i<slimes.length; i++ ){
 		slimes[i].update(dt);
 		slimes[i].draw();
 	}
-	noLoop();
+	// noLoop();
 }
 
 class RandomColor{
