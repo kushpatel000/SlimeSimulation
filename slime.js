@@ -1,45 +1,38 @@
 class Slime{
-	constructor(x,y,xmax,ymax){
-		this.center = createVector(xmax/2, ymax/2);
+	constructor(xmax,ymax){
 		this.xmax = xmax;
 		this.ymax = ymax;
+
+		var x = random(-xmax/2, xmax/2);
+		var y = random(-ymax/2, ymax/2);
+
 		this.q = createVector(x,y);
 		this.v = p5.Vector.random2D().mult(50);
-		console.log(this.v.mag());
-		// this.v = p5.Vector.rotate(this.q, -HALF_PI);
-		this.a = p5.Vector.mult(this.q, -1);
+		this.col = new RandomColor();
+		this.size = 25;
+		this.vision_radius = 2*this.size;
+
+		console.log( this.q.x, this.q.y );
 	}
 
 	draw() {
-		stroke(100,100,255);
-		fill(100,100,255);
-		ellipse(this.q.x,this.q.y,50,50);
+		// noStroke();
+		// fill(this.col.as_hexstring());
+		fill(this.col.rgba_string());
+		// fill( this.r, this.g, this.b);
+		ellipse(this.q.x,this.q.y,this.size,this.size);
 
-		// acceleration and velocity lines:
-		// stroke(255,0,0);
-		// line( this.q.x, this.q.y, 
-		// 	this.q.x+this.v.x,
-		// 	this.q.y+this.v.y
-		// );
-		// stroke(0,255,0);
-		// line( this.q.x, this.q.y, 
-		// 	this.q.x+this.a.x,
-		// 	this.q.y+this.a.y
-		// );
+		// velocity line
+		stroke(this.col.rgba_string());
+		line(this.q.x,this.q.y,this.q.x+this.v.x,this.q.y+this.v.y);
+	
+		fill(255, 60, 100);
+  		text("(" + mouseX + ", " + mouseY + ")", mouseX, mouseY);
 	}
 
-// 	set_velocity(dx, dy) {
-// 		this.v = createVector(dx,dy);
-// 	}
-
-// 	set_acceleration(fx, fy) {
-// 		this.a = createVector(fx,fy);
-// 	}
-
 	update(dt) {
-		// define for now as just rotating around a central point
-		// this.a = p5.Vector.mult(this.q, -1);
-		// this.v.add( p5.Vector.mult(this.a, dt));
+		this.#update_heading();
+
 		this.q.add( p5.Vector.mult(this.v, dt));
 
 		if (this.q.x>this.xmax/2 || this.q.x<-this.xmax/2 ){
@@ -47,11 +40,44 @@ class Slime{
 		}
 		if (this.q.y>this.ymax/2 || this.q.y<-this.ymax/2 ){
 			this.v.y *= -1;
-		} 
-
-		// console.log('a', this.a);
-		// console.log('v', this.v);
-		// console.log('q', this.q);
+		}
 	}
+
+	#update_heading() {
+		let rxmin = Math.max(
+			Math.floor(this.q.x) - this.vision_radius,
+			-width/2
+		);
+		var rxmax = Math.min(
+			Math.floor(this.q.x) + this.vision_radius,
+			width/2
+		);
+		var rymin = Math.max(
+			Math.floor(this.q.y) - this.vision_radius,
+			-height/2
+		);
+		var rymax = Math.min(
+			Math.floor(this.q.y) + this.vision_radius,
+			height/2
+		);
+
+		let test_color = color(255);
+		for (let xx = rxmin; xx <= rxmax; xx++ ){
+			console.log(xx);
+			for (let yy = rymin; yy <= rymax; yy++ ){
+				let d = dist(xx,yy,this.q.x, this.q.y);
+				// if (d>this.size & d<this.vision_radius){
+				// 	set(xx,yy,test_color);
+				// }
+			}
+		}
+		// translate(-width/2, -height/2);
+		// updatePixels();
+		// translate(width/2, height/2);
+		// for (let i = max())
+
+	}
+
+
 
 }
