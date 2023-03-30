@@ -5,71 +5,93 @@ let slimes = [];
 
 // engine elements
 let dt = 0.05;
+let fraps = 1;
 
+// shader variables
+let blockShader0,blockShader1;
+let theShader;
 
-// let blurShader;
-let myShader;
-
-// gaussian blur statistics
-const radius = 16; // must be 16 or less
-const sigma = 10;
-const N = 2*radius+1;
-let kernel1D = [];
-
-// graphics elements
-var canvas;// = document.getElementById("canvas");
-var ctx;//    = canvas.getContext("2d");
+// frame buffer
 let graphics;
-
-// debugging things
-let fraps = 1; // lower frame rate for debug
+let g0, g1;
 let puppy;
+let pingpong = true;
 
 function preload(){
-	generateKernel();
 	// load the shader
-	blurShader = loadShader('blur.vert','blur.frag');
-	// myShader = loadShader('shader.vert','shader.frag');
+	blockShader0 = loadShader('shaders/block.vert','shaders/block.frag');
+	blockShader1 = loadShader('shaders/block.vert','shaders/block.frag');
+	puppy = loadImage('assets/aussie.jpg');
 }
 
-function setup() {
+function setup(){
+	// drop frame rate 
 	frameRate(fraps);
-	// puppy = loadImage('assets/aussie.jpg')
 
-	createCanvas( windowWidth-1, windowHeight-1, WEBGL);
-	ctx = canvas.getContext('webgl');
-	graphics = createGraphics(width, height);
+	// disables scaling for retina screens which can create inconsistent scaling between displays
+	pixelDensity(1);
 
-	graphics.translate(width/2,height/2);
-	graphics.rectMode(CENTER);
-	graphics.noStroke();
-	graphics.fill(255);
-	graphics.ellipse(0,0,500,200,30);
+	// shaders require WEBGL mode to work
+	createCanvas(windowWidth, windowHeight, WEBGL);
+	
+	// g1 = createGraphics(windowWidth,windowHeight, WEBGL);
+	
+	// g0.imageMode(CENTER);
+	// g1.imageMode(CENTER);
 
-	console.log(width, height);
+	noStroke();
+	background(255);
+	imageMode(CENTER);
 
-	image(graphics,-width/2,-height/2,width,height);
+	texture = createTexture(puppy);
 }
 
-function draw() {
-	// Set the shader and pass the blur amount
-	shader(blurShader);
-	// blurShader.setUniform('N',N);
-	// blurShader.setUniform('M',M);
-	blurShader.setUniform('resolution',[width, height]);
-	blurShader.setUniform('kernel1D', kernel1D);
-	// Todo 3: send canvas image instead of puppy
-	blurShader.setUniform('tex0', graphics);
-
-	blurShader.setUniform('blurDirection',[1,0]);
-	// graphics.image(graphics, 0, 0);
+function draw(){
+	background(255);
 	
-	// blurShader.setUniform('blurDirection',[0,1]);
-	// graphics.image(graphics, 0, 0);
-	
-	image(graphics, 0, 0);
+	g0 = createGraphics(texture.width,texture.height, WEBGL);
+	g0.shader(blockShader0);
+	// blockShader0.setUniform('u_resolution', [width, height]);
+	blockShader0.setUniform('u_tex', texture);
+	g0.rect(0,0,width,height);
+	g0.resetShader();
 
-	noLoop();
+	g1 = createGraphics(texture.width,texture.height, WEBGL);
+	g1.shader(blockShader0);
+	// blockShader1.setUniform('u_resolution', [width, height]);
+	blockShader1.setUniform('u_tex', g0);
+	g1.rect(0,0,width,height);
+	g1.resetShader();
+	
+	image(g1, 0,0);
+	// // send data from sketch into shader
+	// blockShader.setUniform('u_resolution', [width, height]);
+	// blockShader.setUniform('u_tex', g1);
+	// // shader() sets the active shader with our shader
+	// g0.shader(blockShader);
+	// g0.background(0);
+	// g0.image(g1,0,0);
+	// resetShader();
+	
+	// blockShader.setUniform('u_resolution', [width, height]);
+	// blockShader.setUniform('u_tex', g0);
+	// g1.background(0);
+	// g1.shader(blockShader);
+	// g1.image(g0,0,0);
+	// resetShader();
+	
+	// image(g1,0,0);
+}
+
+function windowResized(){
+	resizeCanvas(windowWidth, windowHeight);
+}
+
+function createTexture(img) {
+	let texture = createGraphics(img.width, img.height, WEBGL);
+	texture.textureWrap(REPEAT, REPEAT);
+	texture.image(img, 0, 0);
+	return texture;
 }
 
 function generateKernel() {
