@@ -3,16 +3,23 @@ precision mediump float;
 #endif
 
 // uniform vec2 u_resolution;
-uniform sampler2D u_tex;
+// uniform sampler2D u_tex;
 
 varying vec2 vTexCoord;
 
 void main() {
+    // vec2 st = gl_FragCoord.xy / u_resolution.xy;
     vec2 st = vTexCoord;
 
-    vec4 color = texture2D( u_tex, vTexCoord );
-    color.rgb *= 0.9;
-    gl_FragColor = color;
+    // R = dependent on the pixel location in the x-axis, from 0 to 1
+    // G = 0
+    // B = 0
+    // A = 1
+
+    float R = floor(st.x * 5.0) / 5.0;
+    float B = floor(st.y * 5.0) / 5.0;
+
+    gl_FragColor = vec4(R,0.5,B,1.0);
 }
 
 
