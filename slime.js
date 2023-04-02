@@ -9,10 +9,10 @@ class Slime{
 		this.q = createVector(x,y);
 		this.v = p5.Vector.random2D().mult(50);
 		this.col = new RandomColor();
-		this.size = 25;
+		this.size = 10;
 		this.vision_radius = 2*this.size;
 
-		console.log( this.q.x, this.q.y );
+		// console.log( this.q.x, this.q.y );
 	}
 
 	draw(g) {

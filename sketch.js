@@ -10,11 +10,11 @@ TO DO
 
 
 // slime parameters
-let nSlimes = 50;
+let nSlimes = 25;
 let slimes = [];
 
 // engine elements
-let dt = 0.2;
+let dt = 0.125;
 let fraps = 60;
 
 // shader variables
@@ -30,9 +30,9 @@ let puppy;
 // kernel
 let kernel1D = [];
 let kernel_max_len = 33;
-let M = 4;
+let M = 8;
 let N = 2*M+1;
-let sigma = 3.0;
+let sigma = 5.0;
 
 function preload(){
 	// load the shader
@@ -149,7 +149,7 @@ function generateKernel() {
 
 	sum = kernel1D.reduce( (a,b) => a+b,0 );
 	for (let i=0; i<kernel_max_len; i++){
-		kernel1D[i] = 0.995*kernel1D[i]/sum;
+		kernel1D[i] = 0.999*kernel1D[i]/sum;
 	}
 
 }
