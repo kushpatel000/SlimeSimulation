@@ -15,19 +15,19 @@ class Slime{
 		console.log( this.q.x, this.q.y );
 	}
 
-	draw() {
+	draw(g) {
 		// noStroke();
 		// fill(this.col.as_hexstring());
-		fill(this.col.rgba_string());
+		g.fill(this.col.rgba_string());
 		// fill( this.r, this.g, this.b);
-		ellipse(this.q.x,this.q.y,this.size,this.size);
+		g.ellipse(this.q.x,this.q.y,this.size,this.size);
 
 		// velocity line
-		stroke(this.col.rgba_string());
-		line(this.q.x,this.q.y,this.q.x+this.v.x,this.q.y+this.v.y);
+		// g.stroke(this.col.rgba_string());
+		// g.line(this.q.x,this.q.y,this.q.x+this.v.x,this.q.y+this.v.y);
 	
-		fill(255, 60, 100);
-  		text("(" + mouseX + ", " + mouseY + ")", mouseX, mouseY);
+		// fill(255, 60, 100);
+  		// text("(" + mouseX + ", " + mouseY + ")", mouseX, mouseY);
 	}
 
 	update(dt) {
@@ -61,16 +61,16 @@ class Slime{
 			height/2
 		);
 
-		let test_color = color(255);
-		for (let xx = rxmin; xx <= rxmax; xx++ ){
-			console.log(xx);
-			for (let yy = rymin; yy <= rymax; yy++ ){
-				let d = dist(xx,yy,this.q.x, this.q.y);
-				// if (d>this.size & d<this.vision_radius){
-				// 	set(xx,yy,test_color);
-				// }
-			}
-		}
+		// let test_color = color(255);
+		// for (let xx = rxmin; xx <= rxmax; xx++ ){
+		// 	console.log(xx);
+		// 	for (let yy = rymin; yy <= rymax; yy++ ){
+		// 		let d = dist(xx,yy,this.q.x, this.q.y);
+		// 		if (d>this.size & d<this.vision_radius){
+		// 			set(xx,yy,test_color);
+		// 		}
+		// 	}
+		// }
 		// translate(-width/2, -height/2);
 		// updatePixels();
 		// translate(width/2, height/2);

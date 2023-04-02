@@ -1,28 +1,38 @@
+/*
+TO DO
+
+[x] Draw white circle on graphics, let blend
+[x] Remove g2, use only g0,g1; full canvas
+[x] Blank background, simple moving circles
+[x] Slime motion: move along random vector, reflect off edges
+
+*/
+
 
 // slime parameters
-let nSlimes = 0;
+let nSlimes = 50;
 let slimes = [];
 
 // engine elements
-let dt = 0.05;
+let dt = 0.2;
 let fraps = 60;
 
 // shader variables
 let blockShader;
 let burnShader0, burnShader1;
-let blurShader, blurShaderX, blurShaderY;
+let blurShaderX, blurShaderY;
 
 // frame buffer
 let graphics;
-let g0, g1, g2;
+let g0, g1;
 let puppy;
 
 // kernel
 let kernel1D = [];
 let kernel_max_len = 33;
-let M = 16;
+let M = 4;
 let N = 2*M+1;
-let sigma = 100.0;
+let sigma = 3.0;
 
 function preload(){
 	// load the shader
@@ -33,7 +43,6 @@ function preload(){
 
 	blurShaderX = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
 	blurShaderY = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
-	blurShader  = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
 
 	// puppy = loadImage('assets/aussie_trim.jpg');
 }
@@ -53,47 +62,62 @@ function setup(){
 	imageMode(CENTER);
 
 	// texture = createTexture(puppy);
+	for (let i = 0; i < nSlimes; i++){
+		slimes[i] = new Slime(width,height);
+	}
 
 	generateKernel();
-	console.log(kernel1D);
+	// console.log(kernel1D);
 	// noLoop();
 }
 
 function draw(){
 	// only create on first frame
 	if (frameCount == 1){
-		g0 = createGraphics(width/2,height, WEBGL);
-		g0.shader(blockShader);	
-		blockShader.setUniform('u_resolution', [g0.width, g0.height]);
-		g0.rect(0,0,g0.width,g0.height);
-		g0.resetShader();
-		// g0.ellipse(0,0,100,100);
-		
+		g0 = createGraphics(width,height, WEBGL);
 		g1 = createGraphics(g0.width,g0.height, WEBGL);
-		g2 = createGraphics(g1.width,g1.height, WEBGL);
-	
-	
-	} 
-	
-	// apply horzontal blur
-	if(frameCount > 2){
-		applyBlur(g2,g1,'X');
-	} else {
-		applyBlur(g0,g1,'X');
 	}
 	
+	// apply horzontal blur
+	applyBlur(g0,g1,'X');	
 	
 	// apply vertical blur
-	applyBlur(g1,g2,'Y');
-	console.log(g2.M);
+	applyBlur(g1,g0,'Y');
 
-	image(g0,-width/4,0);
-	image(g2, width/4,0);
+	// draw actors
+	g0.reset();
+	g0.noStroke();
+	
+	for (let i = 0; i < nSlimes; i++){
+		slimes[i].update(dt);
+		slimes[i].draw(g0);
+	}
+
+	// r = 100;
+	// f = 3;
+
+	// g0.reset();
+	// g0.noStroke();
+	
+	// x1 = 200*cos( f*radians(frameCount) );
+	// y1 = 200*sin( f*radians(frameCount) );
+	// x2 = 200*cos( f*radians(frameCount) + PI );
+	// y2 = 200*sin( f*radians(frameCount) + PI );
+	
+	// g0.fill(255,0,0,25);
+	// g0.ellipse(x1,y1,r,r);
+	// g0.fill(0,0,255,25);	
+	// g0.ellipse(x2,y2,r,r);
+	// console.log(frameCount);
+
+	// draw buffer to canvas
+	image(g0,0,0);
+	// image(g2, width/4,0);
 	
 	// mid splitter
-	fill(255);
-	rectMode(CENTER);
-	rect( 0,0,10, height );
+	// fill(255);
+	// rectMode(CENTER);
+	// rect( 0,0,10, height );
 	// console.log(g2.get(g2.width/2,g2.height/2));
 	
 }
@@ -125,7 +149,7 @@ function generateKernel() {
 
 	sum = kernel1D.reduce( (a,b) => a+b,0 );
 	for (let i=0; i<kernel_max_len; i++){
-		kernel1D[i] = kernel1D[i]/sum;
+		kernel1D[i] = 0.995*kernel1D[i]/sum;
 	}
 
 }
