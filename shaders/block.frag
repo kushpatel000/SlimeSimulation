@@ -18,8 +18,9 @@ void main() {
 
     float R = floor(st.x * 5.0) / 5.0;
     float B = floor(st.y * 5.0) / 5.0;
+    float G = 0.0 ;
 
-    gl_FragColor = vec4(R,0.5,B,1.0);
+    gl_FragColor = vec4(R,G,B,1.0);
 }
 
 

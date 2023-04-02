@@ -10,11 +10,11 @@ let fraps = 30;
 // shader variables
 let blockShader;
 let burnShader0, burnShader1;
-let blurShader;
+let blurShaderX, blurShaderY;
 
 // frame buffer
 let graphics;
-let g0, g1;
+let g0, g1, g2;
 let puppy;
 
 // kernel
@@ -31,9 +31,10 @@ function preload(){
 	burnShader0 = loadShader('shaders/burn.vert', 'shaders/burn.frag');
 	burnShader1 = loadShader('shaders/burn.vert', 'shaders/burn.frag');
 
-	blurShader = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
+	blurShaderX = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
+	blurShaderY = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
 
-	puppy = loadImage('assets/aussie_trim.jpg');
+	// puppy = loadImage('assets/aussie_trim.jpg');
 }
 
 function setup(){
@@ -50,69 +51,68 @@ function setup(){
 	background(255);
 	imageMode(CENTER);
 
-	texture = createTexture(puppy);
+	// texture = createTexture(puppy);
 
 	generateKernel();
 
-	noLoop();
+	// noLoop();
 }
 
 function draw(){
-	background(240);
-	// scale(1,-1);
-
-	image(texture, -0.30*width, -50);
-
-	// g0 = createGraphics(texture.width,texture.height, WEBGL);
-	// g0.shader(burnShader0);	
-	// burnShader0.setUniform('u_resolution', [g0.width, g0.height]);
-	// burnShader0.setUniform('u_tex', texture);
-	// burnShader0.setUniform('u_burnrate',0.90);
-	// g0.rect(0,0,g0.width,g0.height);
-	// g0.resetShader();
+	// only create on first frame
+	if (frameCount == 1){
+		g0 = createGraphics(width/2,height, WEBGL);
+		g0.shader(blockShader);	
+		blockShader.setUniform('u_resolution', [g0.width, g0.height]);
+		g0.rect(0,0,g0.width,g0.height);
+		g0.resetShader();
+		
+		g1 = createGraphics(g0.width,g0.height, WEBGL);
+		g2 = createGraphics(g1.width,g1.height, WEBGL);
 	
-	// switch to block shader to create block texture
-	// then test for x vs. y directional bluring
-	g0 = createGraphics(texture.width,texture.height, WEBGL);
-	g0.shader(blockShader);	
-	blockShader.setUniform('u_resolution', [g0.width, g0.height]);
-	g0.rect(0,0,g0.width,g0.height);
-	g0.resetShader();
 	
-	image(g0,0,0);
-
-	g1 = createGraphics(g0.width,g0.height, WEBGL);
-	g1.shader(blurShader);
-	blurShader.setUniform('u_resolution', [g1.width, g1.height]);
-	blurShader.setUniform('u_tex', g0);
-	blurShader.setUniform('u_dir',[1,0]);
-	// blurShader.setUniform('u_dir',[0,1]);
-	blurShader.setUniform('u_kernel1D', kernel1D);
-	blurShader.setUniform('u_M', M);
+	} 
+	
+	// apply horzontal blur
+	g1.shader(blurShaderX);
+	blurShaderX.setUniform('u_resolution', [g1.width, g1.height]);	
+	blurShaderX.setUniform('u_dir',[1,0]);
+	blurShaderX.setUniform('u_kernel1D', kernel1D);
+	blurShaderX.setUniform('u_M', M);
+	if(frameCount > 2){
+		blurShaderX.setUniform('u_tex', g2);
+	} else {
+		blurShaderX.setUniform('u_tex', g0);
+	}
 	g1.rect(0,0,g1.width,g1.height);
 	g1.resetShader();
+	
+	// apply vertical blur
+	g2.shader(blurShaderY);
+	blurShaderY.setUniform('u_resolution', [g2.width, g2.height]);
+	blurShaderY.setUniform('u_dir',[0,1]);
+	blurShaderY.setUniform('u_kernel1D', kernel1D);
+	blurShaderY.setUniform('u_M', M);
+	blurShaderY.setUniform('u_tex', g1);
+	g2.rect(0,0,g2.width,g2.height);
+	g2.resetShader();
 
-	image(g1,0.30*width,50);
-	console.log(kernel1D[16]);
-	
-	// image(g1, 0,0);
-	// // send data from sketch into shader
-	// blockShader.setUniform('u_resolution', [width, height]);
-	// blockShader.setUniform('u_tex', g1);
-	// // shader() sets the active shader with our shader
-	// g0.shader(blockShader);
-	// g0.background(0);
-	// g0.image(g1,0,0);
-	// resetShader();
-	
-	// blockShader.setUniform('u_resolution', [width, height]);
-	// blockShader.setUniform('u_tex', g0);
-	// g1.background(0);
-	// g1.shader(blockShader);
-	// g1.image(g0,0,0);
-	// resetShader();
-	
-	// image(g1,0,0);
+	if (frameCount % fraps == 0){
+		console.log(frameCount);
+		
+		// draw images
+		
+		background(240);
+
+		image(g0,-width/4,0);
+		image(g2, width/4,0);
+
+		// mid splitter
+		fill(0);
+		rectMode(CENTER);
+		rect( 0,0,10, height );
+
+	}
 
 }
 
