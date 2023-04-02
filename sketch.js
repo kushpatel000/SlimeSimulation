@@ -5,12 +5,12 @@ let slimes = [];
 
 // engine elements
 let dt = 0.05;
-let fraps = 30;
+let fraps = 60;
 
 // shader variables
 let blockShader;
 let burnShader0, burnShader1;
-let blurShaderX, blurShaderY;
+let blurShader, blurShaderX, blurShaderY;
 
 // frame buffer
 let graphics;
@@ -22,7 +22,7 @@ let kernel1D = [];
 let kernel_max_len = 33;
 let M = 16;
 let N = 2*M+1;
-let sigma = 30.0;
+let sigma = 100.0;
 
 function preload(){
 	// load the shader
@@ -33,6 +33,7 @@ function preload(){
 
 	blurShaderX = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
 	blurShaderY = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
+	blurShader  = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
 
 	// puppy = loadImage('assets/aussie_trim.jpg');
 }
@@ -54,7 +55,7 @@ function setup(){
 	// texture = createTexture(puppy);
 
 	generateKernel();
-
+	console.log(kernel1D);
 	// noLoop();
 }
 
@@ -66,6 +67,7 @@ function draw(){
 		blockShader.setUniform('u_resolution', [g0.width, g0.height]);
 		g0.rect(0,0,g0.width,g0.height);
 		g0.resetShader();
+		// g0.ellipse(0,0,100,100);
 		
 		g1 = createGraphics(g0.width,g0.height, WEBGL);
 		g2 = createGraphics(g1.width,g1.height, WEBGL);
@@ -74,46 +76,26 @@ function draw(){
 	} 
 	
 	// apply horzontal blur
-	g1.shader(blurShaderX);
-	blurShaderX.setUniform('u_resolution', [g1.width, g1.height]);	
-	blurShaderX.setUniform('u_dir',[1,0]);
-	blurShaderX.setUniform('u_kernel1D', kernel1D);
-	blurShaderX.setUniform('u_M', M);
 	if(frameCount > 2){
-		blurShaderX.setUniform('u_tex', g2);
+		applyBlur(g2,g1,'X');
 	} else {
-		blurShaderX.setUniform('u_tex', g0);
+		applyBlur(g0,g1,'X');
 	}
-	g1.rect(0,0,g1.width,g1.height);
-	g1.resetShader();
+	
 	
 	// apply vertical blur
-	g2.shader(blurShaderY);
-	blurShaderY.setUniform('u_resolution', [g2.width, g2.height]);
-	blurShaderY.setUniform('u_dir',[0,1]);
-	blurShaderY.setUniform('u_kernel1D', kernel1D);
-	blurShaderY.setUniform('u_M', M);
-	blurShaderY.setUniform('u_tex', g1);
-	g2.rect(0,0,g2.width,g2.height);
-	g2.resetShader();
+	applyBlur(g1,g2,'Y');
+	console.log(g2.M);
 
-	if (frameCount % fraps == 0){
-		console.log(frameCount);
-		
-		// draw images
-		
-		background(240);
-
-		image(g0,-width/4,0);
-		image(g2, width/4,0);
-
-		// mid splitter
-		fill(0);
-		rectMode(CENTER);
-		rect( 0,0,10, height );
-
-	}
-
+	image(g0,-width/4,0);
+	image(g2, width/4,0);
+	
+	// mid splitter
+	fill(255);
+	rectMode(CENTER);
+	rect( 0,0,10, height );
+	// console.log(g2.get(g2.width/2,g2.height/2));
+	
 }
 
 function windowResized(){
@@ -135,7 +117,7 @@ function generateKernel() {
 	}
 
 	sum = 0.0
-	for (let i=0; i<M; i++){
+	for (let i=0; i<M+1; i++){
 		let arg = 1.0*(i)/sigma;
 		kernel1D[16+i] = Math.exp( -1.0* Math.pow(arg,2)  );
 		kernel1D[16-i] = kernel1D[16+i];
@@ -146,4 +128,31 @@ function generateKernel() {
 		kernel1D[i] = kernel1D[i]/sum;
 	}
 
+}
+
+function applyBlur(g_inp, g_out, dir){
+	// resending data might be taking extra resources
+	// maybe its better to find some way to set these once
+	if (dir == 'X'){
+		g_out.shader(blurShaderX);
+		blurShaderX.setUniform('u_resolution', [g_inp.width, g_inp.height]);
+		blurShaderX.setUniform('u_dir',[1,0]);
+		blurShaderX.setUniform('u_kernel1D', kernel1D);
+		blurShaderX.setUniform('u_M', M);
+		blurShaderX.setUniform('u_tex', g_inp);
+		g_out.rect(0,0,g_out.width,g_out.height);
+		g_out.resetShader();
+
+	} else {
+		g_out.shader(blurShaderY);
+		blurShaderY.setUniform('u_resolution', [g_inp.width, g_inp.height]);
+		blurShaderY.setUniform('u_dir',[0,1]);
+		blurShaderY.setUniform('u_kernel1D', kernel1D);
+		blurShaderY.setUniform('u_M', M);
+		blurShaderY.setUniform('u_tex', g_inp);
+		g_out.rect(0,0,g_out.width,g_out.height);
+		g_out.resetShader();
+	}
+	
+	// return g_out;
 }
