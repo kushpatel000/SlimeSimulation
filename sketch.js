@@ -8,14 +8,17 @@ TO DO
 
 */
 
+// disable frinendly errors
+p5.disableFriendlyErrors = true;
+
 
 // slime parameters
 let nSlimes = 25;
 let slimes = [];
 
 // engine elements
-let dt = 0.125;
-let fraps = 60;
+let dt = 0.25;
+let fraps = 15;
 
 // shader variables
 let blockShader;
@@ -30,9 +33,9 @@ let puppy;
 // kernel
 let kernel1D = [];
 let kernel_max_len = 33;
-let M = 8;
+let M = 16;
 let N = 2*M+1;
-let sigma = 5.0;
+let sigma = 2.5;
 
 function preload(){
 	// load the shader
@@ -61,7 +64,7 @@ function setup(){
 	background(255);
 	imageMode(CENTER);
 
-	// texture = createTexture(puppy);
+	// create slimes
 	for (let i = 0; i < nSlimes; i++){
 		slimes[i] = new Slime(width,height);
 	}
@@ -89,36 +92,12 @@ function draw(){
 	g0.noStroke();
 	
 	for (let i = 0; i < nSlimes; i++){
-		slimes[i].update(dt);
+		slimes[i].update(dt,g0);
 		slimes[i].draw(g0);
 	}
 
-	// r = 100;
-	// f = 3;
-
-	// g0.reset();
-	// g0.noStroke();
-	
-	// x1 = 200*cos( f*radians(frameCount) );
-	// y1 = 200*sin( f*radians(frameCount) );
-	// x2 = 200*cos( f*radians(frameCount) + PI );
-	// y2 = 200*sin( f*radians(frameCount) + PI );
-	
-	// g0.fill(255,0,0,25);
-	// g0.ellipse(x1,y1,r,r);
-	// g0.fill(0,0,255,25);	
-	// g0.ellipse(x2,y2,r,r);
-	// console.log(frameCount);
-
 	// draw buffer to canvas
 	image(g0,0,0);
-	// image(g2, width/4,0);
-	
-	// mid splitter
-	// fill(255);
-	// rectMode(CENTER);
-	// rect( 0,0,10, height );
-	// console.log(g2.get(g2.width/2,g2.height/2));
 	
 }
 
@@ -149,7 +128,8 @@ function generateKernel() {
 
 	sum = kernel1D.reduce( (a,b) => a+b,0 );
 	for (let i=0; i<kernel_max_len; i++){
-		kernel1D[i] = 0.999*kernel1D[i]/sum;
+		// burn applied here; should move to separate shader?
+		kernel1D[i] = 0.995*kernel1D[i]/sum;
 	}
 
 }

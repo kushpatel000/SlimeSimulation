@@ -9,29 +9,29 @@ class Slime{
 		this.q = createVector(x,y);
 		this.v = p5.Vector.random2D().mult(50);
 		this.col = new RandomColor();
-		this.size = 10;
+		this.size = 5;
 		this.vision_radius = 2*this.size;
+		this.vision_perhiperal = radians(15);
 
 		// console.log( this.q.x, this.q.y );
 	}
 
 	draw(g) {
-		// noStroke();
-		// fill(this.col.as_hexstring());
+		// slime itself
+		noStroke();
 		g.fill(this.col.rgba_string());
-		// fill( this.r, this.g, this.b);
 		g.ellipse(this.q.x,this.q.y,this.size,this.size);
 
 		// velocity line
 		// g.stroke(this.col.rgba_string());
-		// g.line(this.q.x,this.q.y,this.q.x+this.v.x,this.q.y+this.v.y);
-	
+		// g.line(this.q.x,this.q.y,this.q.x+this.v.x,this.q.y+this.v.y);		
+
 		// fill(255, 60, 100);
   		// text("(" + mouseX + ", " + mouseY + ")", mouseX, mouseY);
 	}
 
-	update(dt) {
-		this.#update_heading();
+	update(dt,g) {
+		this.#update_heading(dt,g);
 
 		this.q.add( p5.Vector.mult(this.v, dt));
 
@@ -43,38 +43,38 @@ class Slime{
 		}
 	}
 
-	#update_heading() {
-		let rxmin = Math.max(
-			Math.floor(this.q.x) - this.vision_radius,
-			-width/2
-		);
-		var rxmax = Math.min(
-			Math.floor(this.q.x) + this.vision_radius,
-			width/2
-		);
-		var rymin = Math.max(
-			Math.floor(this.q.y) - this.vision_radius,
-			-height/2
-		);
-		var rymax = Math.min(
-			Math.floor(this.q.y) + this.vision_radius,
-			height/2
-		);
+	#update_heading(dt,g) {
+		// origin rotated vision vectors
+		var peek_fwd = p5.Vector.normalize(this.v).mult(this.vision_radius);
+		var peek_lft = p5.Vector.rotate(peek_fwd, -this.vision_perhiperal);
+		var peek_rgt = p5.Vector.rotate(peek_fwd,  this.vision_perhiperal);
+		// push to q location
+		peek_fwd.add(this.q);
+		peek_lft.add(this.q);
+		peek_rgt.add(this.q);
 
-		// let test_color = color(255);
-		// for (let xx = rxmin; xx <= rxmax; xx++ ){
-		// 	console.log(xx);
-		// 	for (let yy = rymin; yy <= rymax; yy++ ){
-		// 		let d = dist(xx,yy,this.q.x, this.q.y);
-		// 		if (d>this.size & d<this.vision_radius){
-		// 			set(xx,yy,test_color);
-		// 		}
-		// 	}
-		// }
-		// translate(-width/2, -height/2);
-		// updatePixels();
-		// translate(width/2, height/2);
-		// for (let i = max())
+		// g.stroke(255);
+		g.fill(255);
+		
+		// g.line(this.q.x, this.q.y, peek_fwd.x, peek_fwd.y);
+		// g.line(this.q.x, this.q.y, peek_lft.x, peek_lft.y);
+		// g.line(this.q.x, this.q.y, peek_rgt.x, peek_rgt.y);
+		
+		// g.circle( peek_fwd.x, peek_fwd.y, 5 );
+		// g.circle( peek_lft.x, peek_lft.y, 5 );
+		// g.circle( peek_rgt.x, peek_rgt.y, 5 );
+
+		let c_fwd = g.get(peek_fwd.x + g.width/2, peek_fwd.y + g.height/2);
+		let c_lft = g.get(peek_lft.x + g.width/2, peek_lft.y + g.height/2);
+		let c_rgt = g.get(peek_rgt.x + g.width/2, peek_rgt.y + g.height/2);
+
+		if ( (c_lft[2] > c_fwd[2]) && (c_lft[2] > c_rgt[2]) ){
+			this.v.rotate(-this.vision_perhiperal);
+		}
+		else if (c_lft[2] > c_fwd[2]) {
+			this.v.rotate(this.vision_perhiperal);
+		}
+
 
 	}
 
