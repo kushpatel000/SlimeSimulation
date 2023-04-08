@@ -10,10 +10,19 @@ class Slime{
 		this.v = p5.Vector.random2D().mult(50);
 		this.col = new RandomColor();
 		this.size = 5;
-		this.vision_radius = 2*this.size;
+		this.vision_radius = 1.25*this.size;
 		this.vision_perhiperal = radians(15);
 
 		// console.log( this.q.x, this.q.y );
+	}
+
+	setPosition(vec){
+		this.q = vec;
+	}
+
+	setHeading(vec){
+		this.v = vec;
+		this.v.normalize().mult(50);
 	}
 
 	draw(g) {
@@ -45,9 +54,9 @@ class Slime{
 
 	#update_heading(dt,g) {
 		// origin rotated vision vectors
-		var peek_fwd = p5.Vector.normalize(this.v).mult(this.vision_radius);
-		var peek_lft = p5.Vector.rotate(peek_fwd, -this.vision_perhiperal);
-		var peek_rgt = p5.Vector.rotate(peek_fwd,  this.vision_perhiperal);
+		let peek_fwd = p5.Vector.normalize(this.v).mult(this.vision_radius);
+		let peek_lft = p5.Vector.rotate(peek_fwd, -this.vision_perhiperal);
+		let peek_rgt = p5.Vector.rotate(peek_fwd,  this.vision_perhiperal);
 		// push to q location
 		peek_fwd.add(this.q);
 		peek_lft.add(this.q);
@@ -68,10 +77,15 @@ class Slime{
 		let c_lft = g.get(peek_lft.x + g.width/2, peek_lft.y + g.height/2);
 		let c_rgt = g.get(peek_rgt.x + g.width/2, peek_rgt.y + g.height/2);
 
-		if ( (c_lft[2] > c_fwd[2]) && (c_lft[2] > c_rgt[2]) ){
+		c_fwd = (c_fwd[0]+c_fwd[1]+c_fwd[2]) * c_fwd[3];
+		c_lft = (c_lft[0]+c_lft[1]+c_lft[2]) * c_lft[3];
+		c_rgt = (c_rgt[0]+c_rgt[1]+c_rgt[2]) * c_rgt[3];
+
+		//head to brightness?
+		if ( (c_lft > c_fwd) && (c_lft > c_rgt) ){
 			this.v.rotate(-this.vision_perhiperal);
 		}
-		else if (c_lft[2] > c_fwd[2]) {
+		else if (c_rgt > c_fwd) {
 			this.v.rotate(this.vision_perhiperal);
 		}
 

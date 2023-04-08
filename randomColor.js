@@ -4,10 +4,16 @@ class RandomColor{
 		// this.g = this.#random_scale();
 		// this.b = this.#random_scale();
 
+		// this.r = 0;
+		// this.g = 0; //255 * Math.round(Math.random());
+		// this.b = 255 - this.g;
+		// this.a = 0.75;
+
+		// full cyan
 		this.r = 0;
-		this.g = 0; //255 * Math.round(Math.random());
-		this.b = 255 - this.g;
-		this.a = 0.75;
+		this.g = 255;
+		this.b = 255;
+		this.a = 1.0;
 	}
 
 	#random_scale(){

@@ -8,17 +8,17 @@ TO DO
 
 */
 
-// disable frinendly errors
+// disable friendly errors
 p5.disableFriendlyErrors = true;
 
 
 // slime parameters
-let nSlimes = 25;
+let nSlimes = 20;
 let slimes = [];
 
 // engine elements
-let dt = 0.25;
-let fraps = 15;
+let dt = 0.125;
+let fraps = 30;
 
 // shader variables
 let blockShader;
@@ -67,6 +67,9 @@ function setup(){
 	// create slimes
 	for (let i = 0; i < nSlimes; i++){
 		slimes[i] = new Slime(width,height);
+		theta = TWO_PI * i / nSlimes;
+		slimes[i].setPosition( p5.Vector.rotate( createVector(50,0), theta ) );
+		slimes[i].setHeading(  p5.Vector.rotate( createVector(50,0), theta ) );
 	}
 
 	generateKernel();
