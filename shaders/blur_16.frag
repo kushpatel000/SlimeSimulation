@@ -26,5 +26,15 @@ void main() {
         sum += texture2D( u_tex, vec2(st.x, st.y) + shift) * u_kernel1D[i];
     }
 
+    // apply additional decay at edges
+    if ( st.x > 0.99 || st.x < 0.01 ) {
+        float edge_scale = 1.49 - abs(st.x-0.5);
+        sum = edge_scale * sum;
+    }
+    if ( st.y > 0.99 || st.y < 0.01 ) {
+        float edge_scale = 1.49 - abs(st.y-0.5);
+        sum = edge_scale * sum;
+    }
+
     gl_FragColor = vec4(sum.rgb, 1.0);
 }

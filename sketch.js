@@ -13,17 +13,18 @@ p5.disableFriendlyErrors = true;
 
 
 // slime parameters
-let nSlimes = 20;
+let nSlimes = 3000;
 let slimes = [];
 
 // engine elements
-let dt = 0.125;
+let dt = 0.0625;
 let fraps = 30;
 
 // shader variables
 let blockShader;
 let burnShader0, burnShader1;
 let blurShaderX, blurShaderY;
+let root_burn_rate = 0.99;
 
 // frame buffer
 let graphics;
@@ -39,10 +40,10 @@ let sigma = 2.5;
 
 function preload(){
 	// load the shader
-	blockShader = loadShader('shaders/block.vert','shaders/block.frag');
+	// blockShader = loadShader('shaders/block.vert','shaders/block.frag');
 	
-	burnShader0 = loadShader('shaders/burn.vert', 'shaders/burn.frag');
-	burnShader1 = loadShader('shaders/burn.vert', 'shaders/burn.frag');
+	// burnShader0 = loadShader('shaders/burn.vert', 'shaders/burn.frag');
+	// burnShader1 = loadShader('shaders/burn.vert', 'shaders/burn.frag');
 
 	blurShaderX = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
 	blurShaderY = loadShader('shaders/blur_16.vert','shaders/blur_16.frag');
@@ -59,6 +60,7 @@ function setup(){
 
 	// shaders require WEBGL mode to work
 	createCanvas(windowWidth-1, windowHeight-1, WEBGL);
+	// createCanvas(400, 300, WEBGL);
 
 	noStroke();
 	background(255);
@@ -67,14 +69,15 @@ function setup(){
 	// create slimes
 	for (let i = 0; i < nSlimes; i++){
 		slimes[i] = new Slime(width,height);
-		theta = TWO_PI * i / nSlimes;
-		slimes[i].setPosition( p5.Vector.rotate( createVector(50,0), theta ) );
-		slimes[i].setHeading(  p5.Vector.rotate( createVector(50,0), theta ) );
+		// theta = TWO_PI * i / nSlimes;
+		// slimes[i].setPosition( p5.Vector.rotate( createVector(50,0), theta ) );
+		// slimes[i].setHeading(  p5.Vector.rotate( createVector(50,0), theta ) );
 	}
 
 	generateKernel();
 	// console.log(kernel1D);
 	// noLoop();
+
 }
 
 function draw(){
@@ -94,8 +97,9 @@ function draw(){
 	g0.reset();
 	g0.noStroke();
 	
+	g0.loadPixels();
 	for (let i = 0; i < nSlimes; i++){
-		slimes[i].update(dt,g0);
+		slimes[i].update(dt,g0, g0.pixels);
 		slimes[i].draw(g0);
 	}
 
@@ -104,9 +108,9 @@ function draw(){
 	
 }
 
-function windowResized(){
-	resizeCanvas(windowWidth, windowHeight);
-}
+// function windowResized(){
+// 	resizeCanvas(windowWidth, windowHeight);
+// }
 
 function createTexture(img) {
 	let texture = createGraphics(img.width, img.height, WEBGL);
@@ -132,7 +136,7 @@ function generateKernel() {
 	sum = kernel1D.reduce( (a,b) => a+b,0 );
 	for (let i=0; i<kernel_max_len; i++){
 		// burn applied here; should move to separate shader?
-		kernel1D[i] = 0.995*kernel1D[i]/sum;
+		kernel1D[i] = root_burn_rate*kernel1D[i]/sum;
 	}
 
 }
