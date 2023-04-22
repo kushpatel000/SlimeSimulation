@@ -1,20 +1,30 @@
 class Slime{
-	constructor(xmax,ymax){
+	constructor(xmax,ymax,cstr){
 		this.xmax = xmax;
 		this.ymax = ymax;
 
 		var x = random(-xmax/2, xmax/2);
 		var y = random(-ymax/2, ymax/2);
 
-		this.vel = 50.0;
+		this.vel = 100.0;
 
 		this.q = createVector(x,y);
 		this.v = p5.Vector.random2D().mult(this.vel);
-		this.col = new RandomColor();
+		
 		this.size = 5;
 		this.vision_radius = 1.5*this.size;
-		this.vision_perhiperal = radians(60);
+		this.vision_perhiperal = radians(15);
 
+		if (cstr == 'blue'){
+			this.col = "#0000FF10"
+			this.tgt = [0,10,0];
+		}
+		else{
+			this.col = "#00FF0010"
+			this.tgt = [0,0,10];
+		}
+			
+		this.rand_limit = HALF_PI;
 		// console.log( this.q.x, this.q.y );
 	}
 
@@ -30,7 +40,7 @@ class Slime{
 	draw(g) {
 		// slime itself
 		noStroke();
-		g.fill(this.col.rgba_string());
+		g.fill(this.col);
 		g.ellipse(this.q.x,this.q.y,this.size,this.size);
 
 		// velocity line
@@ -47,10 +57,12 @@ class Slime{
 		this.q.add( p5.Vector.mult(this.v, dt));
 
 		if (this.q.x>this.xmax/2 || this.q.x<-this.xmax/2 ){
-			this.v.x *= -1;
+			// this.v.x *= -1; // reflect
+			this.q.x *= -1; //pass through
 		}
 		if (this.q.y>this.ymax/2 || this.q.y<-this.ymax/2 ){
-			this.v.y *= -1;
+			// this.v.y *= -1; // reflect
+			this.q.y *= -1; //pass through
 		}
 	}
 
@@ -96,18 +108,20 @@ class Slime{
 		let i_lft = this.#pos_to_pixel( peek_lft, g );
 		let i_rgt = this.#pos_to_pixel( peek_rgt, g );
 
+		// dot product of color * target
 		let c_fwd = 0, c_lft = 0, c_rgt = 0;
 		for (let i = 0; i < 3; i ++){
-			c_fwd += pixels[i_fwd+i];
-			c_lft += pixels[i_lft+i];
-			c_rgt += pixels[i_rgt+i];
+			c_fwd += pixels[i_fwd+i] * this.tgt[i];
+			c_lft += pixels[i_lft+i] * this.tgt[i];
+			c_rgt += pixels[i_rgt+i] * this.tgt[i];
 		}
+		// scale by opacity
 		c_fwd *= pixels[i_fwd+3];
 		c_lft *= pixels[i_lft+3];
 		c_rgt *= pixels[i_rgt+3];
 
 
-		//head to brightness?
+		//head to largest dot
 		if ( (c_lft > c_fwd) && (c_lft > c_rgt) ){
 			this.v.rotate(-this.vision_perhiperal);
 		}
@@ -115,6 +129,9 @@ class Slime{
 			this.v.rotate(this.vision_perhiperal);
 		}
 
+		// add some random rotation
+		// let rand_theta = (Math.random() - 0.5) * this.rand_limit;
+		// this.v.rotate(rand_theta);
 
 	}
 

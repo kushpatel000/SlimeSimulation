@@ -13,7 +13,7 @@ p5.disableFriendlyErrors = true;
 
 
 // slime parameters
-let nSlimes = 3000;
+let nSlimes = 2500;
 let slimes = [];
 
 // engine elements
@@ -59,8 +59,9 @@ function setup(){
 	pixelDensity(1);
 
 	// shaders require WEBGL mode to work
-	createCanvas(windowWidth-1, windowHeight-1, WEBGL);
-	// createCanvas(400, 300, WEBGL);
+	// createCanvas(windowWidth-1, windowHeight-1, WEBGL);
+	createCanvas(windowWidth, 0.75*windowWidth, WEBGL);
+	// createCanvas(800, 600, WEBGL);
 
 	noStroke();
 	background(255);
@@ -68,7 +69,12 @@ function setup(){
 
 	// create slimes
 	for (let i = 0; i < nSlimes; i++){
-		slimes[i] = new Slime(width,height);
+		if(i%2 == 0){
+			slimes[i] = new Slime(width,height, 'blue');
+		}
+		else {
+			slimes[i] = new Slime(width,height, 'green');
+		}
 		// theta = TWO_PI * i / nSlimes;
 		// slimes[i].setPosition( p5.Vector.rotate( createVector(50,0), theta ) );
 		// slimes[i].setHeading(  p5.Vector.rotate( createVector(50,0), theta ) );

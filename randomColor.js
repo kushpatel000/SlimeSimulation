@@ -10,7 +10,7 @@ class RandomColor{
 		// this.g = 255 * Math.round(Math.random());
 		// this.b = 255 - this.g;
 		// this.a = 0.75;
-
+		
 		// full cyan
 		this.r = 0;
 		this.g = 255;
