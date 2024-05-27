@@ -1,30 +1,49 @@
 class Slime{
-	constructor(xmax,ymax,cstr){
+	constructor(xmax,ymax,cidx){
 		this.xmax = xmax;
 		this.ymax = ymax;
 
+		// random q0
 		var x = random(-xmax/2, xmax/2);
 		var y = random(-ymax/2, ymax/2);
-
-		this.vel = 100.0;
-
-		this.q = createVector(x,y);
-		this.v = p5.Vector.random2D().mult(this.vel);
+		// bind y loc to strata
+		// var n_strata = 10;
+		// var y = Math.floor( random(-n_strata/2,n_strata/2) )*ymax/n_strata;
+		// var x = Math.floor( random(-n_strata/2,n_strata/2) )*xmax/n_strata;
 		
-		this.size = 5;
-		this.vision_radius = 1.5*this.size;
-		this.vision_perhiperal = radians(15);
+		this.q = createVector(x,y);
+		
+		this.vel = 50.0;
 
-		if (cstr == 'blue'){
-			this.col = "#0000FF10"
-			this.tgt = [0,10,0];
-		}
-		else{
-			this.col = "#00FF0010"
-			this.tgt = [0,0,10];
+		this.size = 3;
+		this.vision_radius = 1.5*this.size;
+		// this.vision_perhiperal = radians(15);
+		this.vision_perhiperal = radians(30);
+		
+		// this.v = p5.Vector.random2D().mult(this.vel);
+		// bind velocities to specific angles
+		let n_angles = Math.floor( radians(360)/this.vision_perhiperal );
+		this.v = createVector(1,0).mult(this.vel);
+		let rand_heading = Math.floor(random()*n_angles);
+		this.v.setHeading( rand_heading*this.vision_perhiperal );
+		
+		let repl = -30;
+		let attr = 10;
+		switch (cidx) {
+			case 0: // cyan
+				this.col = "#00FFFF50";
+				this.tgt = [repl,attr,attr];
+				break;
+			case 1: // magenta
+				this.col = "#FF00FF50";
+				this.tgt = [attr,repl,attr];
+				break;
+			case 2: // yellow
+				this.col = "#FFFF0050";
+				this.tgt = [attr,attr,repl];
 		}
 			
-		this.rand_limit = HALF_PI;
+		// this.rand_limit = HALF_PI;
 		// console.log( this.q.x, this.q.y );
 	}
 
@@ -138,7 +157,7 @@ class Slime{
 	#pos_to_pixel( vec, g ) {
 		let xx = int(vec.x + g.width/2 );
 		xx = max(min( xx, g.width-1 ), 0);
-		let yy = int(vec.y + g.height/2);
+		let yy = int(-vec.y + g.height/2);
 		yy = max(min( yy, g.height-1 ), 0);
 		// console.log(xx,yy, (yy*g.width + xx) * 4);
 		return (yy*g.width + xx) * 4;

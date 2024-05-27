@@ -13,18 +13,18 @@ p5.disableFriendlyErrors = true;
 
 
 // slime parameters
-let nSlimes = 2500;
+let nSlimes = 5000;
 let slimes = [];
 
 // engine elements
 let dt = 0.0625;
-let fraps = 30;
+let fraps = 60;
 
 // shader variables
 let blockShader;
 let burnShader0, burnShader1;
 let blurShaderX, blurShaderY;
-let root_burn_rate = 0.99;
+let root_burn_rate = 0.95;
 
 // frame buffer
 let graphics;
@@ -60,8 +60,12 @@ function setup(){
 
 	// shaders require WEBGL mode to work
 	// createCanvas(windowWidth-1, windowHeight-1, WEBGL);
-	createCanvas(windowWidth, 0.75*windowWidth, WEBGL);
-	// createCanvas(800, 600, WEBGL);
+	createCanvas(windowWidth-1, windowHeight/2, WEBGL);
+	// createCanvas(windowWidth/2, windowHeight/2, WEBGL);
+	// createCanvas(windowWidth, 0.75*windowWidth, WEBGL);
+	// createCanvas(1900, 1000, WEBGL);
+	// createCanvas(640, 480, WEBGL);
+	// createCanvas(320, 240, WEBGL);
 
 	noStroke();
 	background(255);
@@ -69,12 +73,7 @@ function setup(){
 
 	// create slimes
 	for (let i = 0; i < nSlimes; i++){
-		if(i%2 == 0){
-			slimes[i] = new Slime(width,height, 'blue');
-		}
-		else {
-			slimes[i] = new Slime(width,height, 'green');
-		}
+		slimes[i] = new Slime(width, height, i%3);
 		// theta = TWO_PI * i / nSlimes;
 		// slimes[i].setPosition( p5.Vector.rotate( createVector(50,0), theta ) );
 		// slimes[i].setHeading(  p5.Vector.rotate( createVector(50,0), theta ) );
@@ -105,7 +104,7 @@ function draw(){
 	
 	g0.loadPixels();
 	for (let i = 0; i < nSlimes; i++){
-		slimes[i].update(dt,g0, g0.pixels);
+		slimes[i].update(dt, g0, g0.pixels);
 		slimes[i].draw(g0);
 	}
 
